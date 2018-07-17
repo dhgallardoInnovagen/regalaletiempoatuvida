@@ -1,0 +1,76 @@
+<?php
+
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
+
+class Login extends MX_Controller {
+
+    public function __construct() {
+
+        parent::__construct();
+        $this->lang->load('pin', 'es');
+        $this->load->model('login_model');
+        $this->load->library('session');
+    }
+
+    public function index() {
+        $datos['page_title'] = $this->lang->line('lbl_titulo_pagina');
+        $datos['contenido_title'] = "Index";
+        $this->load->view('inicio', $datos);
+    }
+
+    public function principal() {
+        echo 'ingresando a principal';
+        $datos['page_title'] = $this->lang->line('lbl_titulo_pagina');
+        $datos['contenido_title'] = "Index";
+        $datos['contenido'] = "inicio";
+        $this->load->view('plantillas/plantilla', $datos);
+    }
+
+    public function data_users() {
+        return $this->login_model->get_users();
+    }
+
+    public function login1() {
+        $this->session->keep_flashdata('tried_to');
+        $pass = $this->input->POST('inputPassword');
+        $usuario = $this->input->POST('inputUsuario');
+
+        if ($this->login_model->validarAutenticacionUsuario($usuario, $pass)) {
+            $usuarioLogeado = $this->login_model->get_usuario_rol($usuario);
+            $customdata = array('username' => $usuario,
+                'logged_in' => TRUE,
+                'rol' => $usuarioLogeado->id_rol,
+                'nombre_rol' => $usuarioLogeado->nombre_rol,
+                'id_usuario' => $usuarioLogeado->id_usuario,
+                'nombre_user' => $usuarioLogeado->nombre_usuario,
+                'sistema_usuario' => $usuarioLogeado->sistema,
+                'telefono_usuario' => $usuarioLogeado->telefono,
+                'correo_usuario' => $usuarioLogeado->correo,
+                'area_usuario' => $usuarioLogeado->area_unidad,
+                'nombre_usuario' => $usuarioLogeado->nombres,
+                'apellido_usuario' => $usuarioLogeado->apellidos,
+                'cedula' => $usuarioLogeado->numero_documento,
+                'contrasena_usuario' => $usuarioLogeado->contrasenia,
+                'id_ips' => $usuarioLogeado->id_ips,
+                'id_eps' => $usuarioLogeado->id_eps);
+
+            $this->session->set_userdata($customdata);
+            $respuesta['success'] = TRUE;
+            $respuesta['title'] = $this->lang->line('lbl_operacion_exitosa');
+            $respuesta['url'] = base_url() . 'indicador/reporte_tamizacion';          
+        } else {
+            $respuesta['success'] = FALSE;
+            $respuesta['title'] = $this->lang->line('lbl_error');
+            $respuesta['msg'] = $this->lang->line('lbl_error_autenticacion');
+        }
+        echo json_encode($respuesta);
+    }
+
+    public function logout() {
+        $this->session->set_userdata(array('logged_in' => FALSE));
+        $this->session->sess_destroy();
+        redirect('', 'refresh');
+    }
+
+}

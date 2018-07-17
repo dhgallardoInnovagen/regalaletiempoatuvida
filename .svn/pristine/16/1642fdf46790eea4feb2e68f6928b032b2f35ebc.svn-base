@@ -1,0 +1,188 @@
+<?php
+
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
+
+class Validar_encuesta extends MX_Controller {
+
+    public function __construct() {
+        parent::__construct();
+        $this->load->model('validar_encuesta_model', 'modelo');
+        $this->load->helper('utilidades');
+    }
+
+    public function index() {
+        $datos['page_title'] = $this->lang->line('lbl_titulo_pagina_inconsistencia');
+        $datos['contenido_title'] = "Index";
+        $datos['contenido'] = "validar_encuesta_view";
+        $this->load->view('plantillas/plantilla', $datos);
+    }
+
+    public function gestionarInconsitencia() {
+        $datos['page_title'] = $this->lang->line('lbl_titulo_pagina_inconsistencia');
+        $datos['contenido_title'] = "Index";
+        $datos['contenido'] = "inconsistencia_view";
+        $this->load->view('plantillas/plantilla', $datos);
+    }
+
+    public function validarCedulas() {
+        $cedulas = $this->input->POST('cedulas');
+        $this->validarErroresEncuestas($cedulas);
+    }
+
+    public function validarErroresEncuestas($cedulas) {
+        $FALTA_EPIDEMIOLOGICA = 1;
+        $FALTA_ESTADO_CUELLO = 2;
+        $SIN_ENCUESTAS = 3;
+        $ERROR_FECHA_NACIMIENTO = 4;
+        $ERROR_FECHA_TOMA = 5;
+        $cedula = explode(",", $cedulas);
+        $cedula = array_unique($cedula);
+        $resultadoValidacion = array();
+        foreach ($cedula as $ced) {
+            $epidemiologica = TRUE;
+            $estadoCuello = TRUE;
+            $fechaTomaCitología = TRUE;
+            $fechaNacimiento = TRUE;
+            $fechFechaNacimiento = '';
+            $fechFechaToma = '';
+            $nombreUsuaria = '';
+            $municipio = '';
+            $nombreEncuestador = '';
+            $fechaReporte = NULL;
+            $id_categoria = '';
+            if ($ced != '') {
+                $resultado = $this->modelo->validarEpidemiologica($ced);
+                if (!$resultado) {
+                    $epidemiologica = FALSE;
+                    $fechaNacimiento = FALSE;
+                } else {
+                    $resultadoFechaNacimiento = $this->modelo->validarFechaNacimiento($ced);
+                    $nombreUsuaria = $resultado->primer_nombre . ' ' . $resultado->segundo_nombre . ' ' . $resultado->primer_apellido . ' ' . $resultado->segundo_apellido;
+                    $municipio = $resultado->municipio;
+                    $nombreEncuestador = $resultado->nombre_encuestador;
+                    $fechaReporte = $resultado->fecha_reporte;
+                    $fechFechaNacimiento = $resultado->fecha_nacimiento;
+                    if (!$resultadoFechaNacimiento) {
+                        $fechaNacimiento = FALSE;
+                    }
+                }
+                $resultadoEstadoCuello = $this->modelo->validarEstadoCuello($ced);
+                if (!$resultadoEstadoCuello) {
+                    $estadoCuello = FALSE;
+                    $fechaTomaCitología = FALSE;
+                } else {
+                    $nombreEncuestador = $resultadoEstadoCuello->nombre_responsable;
+                    $fechaReporte = $resultadoEstadoCuello->fecha_toma;
+                    $fechFechaToma = $resultadoEstadoCuello->fecha_toma;
+                    $resultadoFechaToma = $this->modelo->validarFechaTomaCitologia($ced);
+                    if (!$resultadoFechaToma) {
+                        $fechaTomaCitología = FALSE;
+                    }
+                }
+            }
+            if (!$epidemiologica || !$estadoCuello || !$fechaNacimiento || !$fechaTomaCitología) {
+                if (!$epidemiologica && !$estadoCuello) {
+                    $id_categoria = $SIN_ENCUESTAS;
+                } else {
+                    if (!$epidemiologica && $estadoCuello) {
+                        $id_categoria = $FALTA_EPIDEMIOLOGICA;
+                    } else {
+                        if ($epidemiologica && !$estadoCuello) {
+                            $id_categoria = $FALTA_ESTADO_CUELLO;
+                        } else {
+                            if (!$fechaNacimiento) {
+                                $id_categoria = $ERROR_FECHA_NACIMIENTO;
+                            } else {
+                                if (!$fechaTomaCitología) {
+                                    $id_categoria = $ERROR_FECHA_TOMA;
+                                }
+                            }
+                        }
+                    }
+                }
+                $elemento = array(
+                    'numero_documento' => $ced,
+                    'encuesta_epidemiologica' => ($epidemiologica) ? 'SI' : 'NO',
+                    'encuesta_estado_cuello' => ($estadoCuello) ? 'SI' : 'NO',
+                    'fecha_nacimiento' => ($fechaNacimiento) ? 'SI' : 'NO',
+                    'fecha_toma_citologia' => ($fechaTomaCitología) ? 'SI' : 'NO',
+                    'nombre_usuaria' => $nombreUsuaria,
+                    'procedencia' => $municipio,
+                    'diligencia' => $nombreEncuestador,
+                    'fecha_encuesta' => ($fechaReporte == '') ? NULL : $fechaReporte,
+                    'id_categoria' => $id_categoria,
+                    'fechFechaNacimiento' => $fechFechaNacimiento,
+                    'fechFechaToma' => $fechFechaToma
+                );
+                $resultadoValidacion[] = $elemento;
+            }
+        }
+        $rows['success'] = TRUE;
+        $rows['title'] = 'Info';
+//        $rows["current"] = 1;
+//        $rows["rowCount"] = 1;
+//        $rows["total"] = count($resultadoValidacion);
+        $rows['msg'] = 'Se encontró ' . count($resultadoValidacion) . ' inconsistencia(s) de ' . count($cedula) . ' registro(s).';
+        $rows["rows"] = $resultadoValidacion;
+        echo json_encode($rows);
+    }
+
+    public function reportarInconsistencias() {
+        $inconsistencias = $this->input->post('inconsitencias');
+        $arrayInconsistencias = array();
+        $estadoInconsistenca = array();
+        $banderaValidarModificacion = false;
+        for ($index = 0; $index < count($inconsistencias); $index++) {
+            if ($this->modelo->validarInconsistencia($inconsistencias[$index]['numero_documento']) == false) {
+                $idInconsistencia = $this->modelo->nextValIdInconsistencia();
+                $inc = array(
+                    'id_inconsistencia' => $idInconsistencia,
+                    'encuesta_epidemiologica' => ($inconsistencias[$index]['encuesta_epidemiologica'] == 'SI') ? 't' : 'f',
+                    'encuesta_estado_cuello' => ($inconsistencias[$index]['encuesta_estado_cuello'] == 'SI') ? 't' : 'f',
+                    'fecha_nacimiento' => ($inconsistencias[$index]['fecha_nacimiento'] == 'SI') ? 't' : 'f',
+                    'fecha_toma_citologia' => ($inconsistencias[$index]['fecha_toma_citologia'] == 'SI') ? 't' : 'f',
+                    'fecha_encuesta' => ($inconsistencias[$index]['fecha_encuesta'] == '') ? NULL : $inconsistencias[$index]['fecha_encuesta'],
+                    'numero_documento' => $inconsistencias[$index]['numero_documento'],
+                    'nombre_usuaria' => $inconsistencias[$index]['nombre_usuaria'],
+                    'procedencia' => $inconsistencias[$index]['procedencia'],
+                    'diligencia' => $inconsistencias[$index]['diligencia'],
+                    'id_categoria' => $inconsistencias[$index]['id_categoria']
+                );
+//                echo '<'.$inconsistencias[$index]['fecha_encuesta'].'>';
+                $elemento = array(
+                    'id_inconsistencia' => $idInconsistencia,
+                    'id_usuario' => $this->session->userdata('id_usuario'),
+                    'estado' => 'CREADO',
+                    'fecha' => date("Y-m-d")
+                );
+                $estadoInconsistenca[] = $elemento;
+                $arrayInconsistencias[] = $inc;
+                $banderaValidarModificacion = true;
+            }
+        }
+        if ($banderaValidarModificacion) {
+            echo ($this->modelo->reportarInconsistencias($arrayInconsistencias, $estadoInconsistenca));
+        } else {
+            $respuesta['success'] = FALSE;
+            $respuesta['title'] = 'Error';
+            $respuesta['msg'] = 'No se encontraron inconsistencias nuevas para reportar';
+            echo json_encode($respuesta);
+        }
+    }
+
+    public function getCedulasConArchivo() {
+        $localFile = $_FILES['inputCedulas']['tmp_name'];
+        $handle = fopen($localFile, 'r');
+        $cedulas = '';
+        while (($data = fgetcsv($handle, 10000, ",")) !== FALSE) {
+            for ($index = 0; $index < count($data); $index++) {
+                $cedulas = $cedulas . ',' . $data[$index];
+            }
+        }
+        $respuesta['success'] = TRUE;
+        $respuesta['rows'] = $cedulas;
+        echo json_encode($respuesta);
+    }
+
+}

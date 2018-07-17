@@ -1,0 +1,32 @@
+/* 
+    Document   : type-files
+    Created on : 18-feb-2014, 22:04:53
+    Author     : Peter
+    Description:
+        Purpose of the stylesheet follows.
+*/
+#table_files
+.type-file{
+    padding: 2px 0 2px  20px;
+    background-repeat: no-repeat;
+    font-family: Verdana,Arial,Helvetica,AppleGothic,sans-serif;
+    font-size: 12px;
+    
+}
+ 
+.type-file-0{ background-image: url(../img/iconos/page_white_excel.png);    }
+.type-file-1{ background-image: url(../img/iconos/page_white_word.png); }
+.type-file-2{ background-image: url(../img/iconos/page_white_excel.png); }
+.type-file-3{ background-image: url(../img/iconos/music.png); }
+.type-file-4{ background-image: url(../img/iconos/film.png); }
+.type-file-5{ background-image: url(../img/iconos/page_white_powerpoint.png); }
+.type-file-6{ background-image: url(../img/iconos/page_white_acrobat.png); }
+.type-file-7{ background-image: url(../img/iconos/page_white_compressed.png); }
+.type-file-8{ background-image: url(../img/iconos/text_align_justify.png); }
+.type-file-9{ background-image: url(../img/iconos/page_white_world.png); }
+.type-file-10{ background-image: url(../img/iconos/tag.png); }
+.type-file-, .type-file-11{ background-image: url(../img/iconos/page_white.png); }
+.type-file-12{ background-image: url(../img/iconos/photo.png); }
+.type-file-13{ background-image: url(../img/iconos/application_xp.png); }
+.delete-mark-file { text-decoration: line-through; opacity: 0.5;
+filter:alpha(opacity=50); } 

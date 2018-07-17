@@ -1,0 +1,129 @@
+<?php
+
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
+
+class Gestion_positivas extends MX_Controller {
+
+    public function __construct() {
+        parent::__construct();
+        $this->load->model('Gestion_positivas_model', 'modelo');
+        $this->load->helper('utilidades');
+    }
+
+    public function index() {
+        $datos['page_title'] = $this->lang->line('lbl_titulo_pagina');
+        $datos['contenido_title'] = "Index";
+        $datos['contenido'] = "gestion_positivas_view";
+        $this->load->view('plantillas/plantilla', $datos);
+    }
+
+    public function getPositivas() {
+        $datos = new stdClass();
+        $datos->current = $this->input->post('current');
+        $datos->rowCount = $this->input->post('rowCount');
+        $datos->sort = $this->input->post('sort');
+        $datos->searchPhrase = $this->input->post('searchPhrase');
+        $datos->seguimiento = $this->input->post('seguimiento');
+        echo ($this->modelo->getPositivas($datos));
+    }
+
+    public function exportarReporteTamizacion() {
+        $table = $this->modelo->getReporteTamizacionExportar();
+        $this->load->library('excel_pdf_manager');
+        $this->excel_pdf_manager->export($table, "Reporte_tamizacion " . date("d/m/Y"), ".xls");
+    }
+
+    public function exportarRecomendacionesTamizadas() {
+        $table = $this->modelo->exportarRecomendacionesTamizadas();
+        $this->load->library('excel_pdf_manager');
+        $this->excel_pdf_manager->export($table, "UsuariasTamizadas " . date("d/m/Y"), ".xls");
+    }
+
+    public function getAtenciones() {
+        $id_positiva = $this->input->post('idPositiva');
+        echo ($this->modelo->getAtenciones($id_positiva));
+    }
+
+    public function getTratamientos() {
+        $id_positiva = $this->input->post('idPositiva');
+        echo ($this->modelo->getTratamientos($id_positiva));
+    }
+
+    public function asignarAtencion() {
+        $datos = new stdClass();
+        $id = $this->modelo->genId('pin_atencion_id_atencion_seq');
+        $datos->id_atencion = $id;
+        $datos->id_positiva = $this->input->post('idPositiva');
+        $datos->tipo_atencion = $this->input->post('tipoAtencion');
+        $datos->fecha_atencion = $this->input->post('fechaAtencion');
+        $datos->conducta = $this->input->post('conducta');
+        $datos->diagnostico = $this->input->post('diagnostico');
+        //Insertando datos en la bitácora        
+        $datosBitacora = new stdClass();
+        $datosBitacora->id_usuario = $this->session->userdata('id_usuario');
+        $datosBitacora->fecha_actividad = date("Y-m-d H:i:s");
+        $datosBitacora->actividad = 'Crear atención positivas';
+        $datosBitacora->id_registro = $id;
+        $this->modelo->insertarBitacora($datosBitacora);
+        //Cambiando estado a positiva
+        $this->modelo->cambiarEstado($datos->id_positiva);
+        echo ($this->modelo->asignarAtencion($datos));
+    }
+
+    public function asignarTratamiento() {
+        $datos = new stdClass();
+        $id = $this->modelo->genId('pin_tratamiento_id_tratamiento_seq');
+        $datos->id_tratamiento = $id;
+        $datos->id_positiva = $this->input->post('idPositiva');
+        $datos->tratamiento = $this->input->post('tratamiento');
+        $datos->fecha_tratamiento = $this->input->post('fechaTratamiento');
+        $datos->resultado = $this->input->post('resultado');
+        //Insertando datos en la bitácora        
+        $datosBitacora = new stdClass();
+        $datosBitacora->id_usuario = $this->session->userdata('id_usuario');
+        $datosBitacora->fecha_actividad = date("Y-m-d H:i:s");
+        $datosBitacora->actividad = 'Crear tratamiento positivas';
+        $datosBitacora->id_registro = $id;
+        $this->modelo->insertarBitacora($datosBitacora);
+        //Cambiando estado a positiva
+        $this->modelo->cambiarEstado($datos->id_positiva);
+        echo ($this->modelo->asignarTratamiento($datos));
+    }
+
+    public function asignarSeguimiento() {
+        $datos = new stdClass();
+        $idPositiva = $this->input->post('idPositiva');
+        $datos->conducta = $this->input->post('conducta');
+        if ($this->input->post('fechaNotificacion') != '') {
+            $datos->fecha_noti_eps = $this->input->post('fechaNotificacion');
+        }
+        $datos->no_oficio = $this->input->post('numeroNotificacion');
+        if ($this->input->post('fechaControl') != '') {
+            $datos->fecha_control_cotest = $this->input->post('fechaControl');
+        }
+        $datos->resultado_control = $this->input->post('resultadoControl');
+        if ($this->input->post('fechaVisita') != '') {
+            $datos->fecha_visita_domiciliaria = $this->input->post('fechaVisita');
+        }        
+        $datos->visita_domiciliaria = $this->input->post('obs_visita');
+        $datos->observaciones_eps = $this->input->post('obs_eps');
+        $datos->observaciones_pto = $this->input->post('obs_pto_atencion');
+        $datos->observaciones_sds = $this->input->post('obs_sdsc');
+        
+        $datosBitacora = new stdClass();
+        $datosBitacora->id_usuario = $this->session->userdata('id_usuario');
+        $datosBitacora->fecha_actividad = date("Y-m-d H:i:s");
+        $datosBitacora->actividad = 'Editar Seguimiento positivas';
+        $datosBitacora->id_registro = $idPositiva;
+        $this->modelo->insertarBitacora($datosBitacora);
+        //Cambiando estado a positiva
+        $this->modelo->cambiarEstado($idPositiva);
+        echo ($this->modelo->asignarSeguimiento($datos, $idPositiva));
+    }
+
+    public function getEPS() {
+        echo ($this->modelo->getEPS());
+    }
+
+}

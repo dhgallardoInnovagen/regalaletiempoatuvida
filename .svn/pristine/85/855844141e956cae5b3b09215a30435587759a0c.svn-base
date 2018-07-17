@@ -1,0 +1,119 @@
+<?php
+
+/*
+ * Autor: Jamith Bolaños Vidal
+ * Fecha: 27/05/2015
+ * Modelo que realiza el acceso a los datos relacionado con la información de indicadores
+ */
+
+class Validar_encuesta_model extends CI_Model {
+
+    private $menu;
+
+    function __construct() {
+        parent::__construct();
+    }
+
+    function validarEpidemiologica($ced) {
+        $this->db->select('numero_documento, primer_nombre,segundo_nombre, primer_apellido, segundo_apellido, municipio, nombre_encuestador, fecha_reporte, fecha_nacimiento');
+        $this->db->from('resultado_epidemiologica');
+        $this->db->where('numero_documento', $ced);
+        $consulta = $this->db->get();
+        $row = array();
+        if ($consulta->num_rows() > 0) {
+            $row = $consulta->first_row();
+            return $row;
+        } else {
+            return $row;
+        }
+    }
+
+    function validarEstadoCuello($ced) {
+        $this->db->select('numero_cedula, nombre_responsable, fecha_toma');
+        $this->db->from('pin_toma_citologia');
+        $this->db->where('numero_cedula', $ced);
+        $consulta = $this->db->get();
+        $row = array();
+        if ($consulta->num_rows() > 0) {
+            $row = $consulta->first_row();
+            return $row;
+        } else {
+            return $row;
+        }
+    }
+
+    function validarFechaNacimiento($ced) {
+        $this->db->select('fecha_nacimiento');
+        $this->db->from('resultado_epidemiologica');
+        $this->db->where('numero_documento', $ced);
+        $consulta = $this->db->get();
+        if ($consulta->num_rows() > 0) {
+            foreach ($consulta->result() as $row) {
+                if ($row->fecha_nacimiento != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function validarFechaTomaCitologia($ced) {
+        $this->db->select('fecha_toma');
+        $this->db->from('pin_toma_citologia');
+        $this->db->where('numero_cedula', $ced);
+        $consulta = $this->db->get();
+        if ($consulta->num_rows() > 0) {
+            foreach ($consulta->result() as $row) {
+                if ($row->fecha_toma != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    function reportarInconsistencias($inconsistencias, $estadoInconsistenca){
+        $registros = count($inconsistencias);
+        if ($this->db->insert_batch('pin_inconsistencia', $inconsistencias)) {
+            $respuesta['success'] = TRUE;
+            $respuesta['title'] = 'Operación exitosa';
+            $respuesta['msg'] = 'Se ingresaron ' . $registros . " registro(s) nuevo(s)";
+        } else {
+            $respuesta['success'] = FALSE;
+            $respuesta['title'] = 'Error';
+            $respuesta['msg'] = 'Ocurrio un error al crear el indicador';
+        }
+         if ($this->db->insert_batch('pin_estado_inconsistencia', $estadoInconsistenca)) {
+            $respuesta['success'] = TRUE;
+            $respuesta['title'] = 'Operación exitosa';
+            $respuesta['msg'] = 'Se ingresaron ' . $registros . " registro(s) nuevo(s)";
+        } else {
+            $respuesta['success'] = FALSE;
+            $respuesta['title'] = 'Error';
+            $respuesta['msg'] = 'Ocurrio un error al crear el indicador';
+        }
+        
+        return json_encode($respuesta);
+    }
+    
+    function nextValIdInconsistencia(){
+        $query = $this->db->query("select nextval('pin_inconsistencia_id_inconsistencia_seq')");
+        $array = $query->result();
+        return($array[0]->nextval);       
+    }
+    
+    function validarInconsistencia($numeroDocumento){
+        $this->db->select('pin_inconsistencia.id_inconsistencia');
+        $this->db->from('pin_inconsistencia');
+        $this->db->join('pin_estado_inconsistencia','pin_inconsistencia.id_inconsistencia = pin_estado_inconsistencia.id_inconsistencia');        
+        $this->db->where('estado', 'CREADO');
+        $this->db->where('numero_documento', $numeroDocumento);
+        $consulta = $this->db->get();      
+        if ($consulta->num_rows() > 0) {
+           return true;
+        } else {
+            return false;
+        }
+    }
+
+}

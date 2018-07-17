@@ -1,0 +1,103 @@
+
+
+<script type="text/javascript" src="<?php echo base_url() ?>public/js/funcionesIngresarIndicador.js"></script>
+
+<div class="form-group" align="center">
+    <div class="col-md-8" align="center">
+        <div class="alert alert-danger" id="errorIndicador" hidden="true">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <output id="msgErrorIndicador"></output>             
+        </div>  
+
+        <div class="alert alert-success" id="successIndicador" hidden="true">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <output id="msgOkIndicador"></output>
+        </div>  
+        <div class="table-responsive">
+            <table id="grid-data" class="table table-condensed table-hover table-striped" data-toggle="bootgrid" data-ajax="true" cellspacing="0" width="100%" data-url="ingresar_indicador/getRegistroIndicador">
+                <thead>
+                    <tr>
+            <!--            <th data-column-id="id" data-type="numeric" data-identifier="true">ID</th>-->
+    <!--                    <th data-column-id="id_registro_indicador" hidden="true">Id reg</th>-->
+                        <th data-column-id="id_indicador"  >Id</th>
+                        <th data-column-id="nombre_indicador" data-formatter="indicadoresALlenar">Indicador</th>
+                        <th data-column-id="nombre_municipio">Municipio</th>
+                        <th data-column-id="fecha_inicial">Fecha inicial</th>
+                        <th data-column-id="fecha_final">Fecha final</th>
+                        <th data-column-id="resultado" data-formatter="resultado">Resultado</th>
+                        <th data-column-id="commands" data-formatter="commands" data-sortable="false">Ingresar</th>
+                    </tr>
+                </thead>	
+            </table> 
+        </div>
+    </div>    
+</div>
+
+<!--modal para crear y editar un nuevo indicador-->
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Registro de medición del indicador</h4>
+            </div>
+            <div class="modal-body">
+                <form id ="datosIndicador" data-toggle="validator">
+                    <div class="form-group">
+                        <div class="row" hidden="true">
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Id indicador </p></b> </div>
+                            <div class="col-md-10"><input  type="text" class="form-control" name="idIndicador" id="idIndicador"></input></div>
+                            <div class="col-md-10"><input  type="text" class="form-control" name="idRegistroIndicador" id="idRegistroIndicador"></input></div>
+                        </div>
+                        <div class="row">
+                            <br/>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Indicador </p></b> </div>
+                            <div class="col-md-10"><input  type="text" class="form-control" name="nombreIndicador" id="nombreIndicador" readonly="true"></input></div>
+                        </div>
+                        </br>
+                        <div class="row">
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Definición operacional </p></b> </div>
+                            <div class="col-md-10"><textarea  type="text" class="form-control" name="definicionOperacional" rows="1" id="definicionOperacional" readonly="true"></textarea></div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Forma de cálculo </p></b> </div>
+                            <div class="col-md-10"><textarea  type="text" class="form-control" name="formaCalculo" id="formaCalculo" rows="1" readonly="true"></textarea></div>
+                        </div>
+                        <br/>
+                        <div class="row">                        
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Municipio </p></b> </div>
+                            <div class="col-md-10"><input  type="text" class="form-control" name="nombreMunicipio" id="nombreMunicipio" readonly="true"></input></div>
+                        </div>
+
+                        <div class="row">                                                        
+                            <br/>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Meta </p></b> </div>
+                            <div class="col-md-5"><input type="text" class="form-control" name="metaIndicador" id="metaIndicador" readonly="true"></input></div>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Constante </p></b> </div>
+                            <div class="col-md-3"><input  type="text" class="form-control bfh-number" name="coeficienteIndicador" id="coeficienteIndicador" readonly="true"></input></div>
+                        </div>
+                        <div class="row">
+                            <br/>
+                            <div class="col-md-2"></div>
+                            <div class="col-md-3"><b><p name="nom" id="nom" >Numerador&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ </p></b><input type="text" class="form-control bfh-number" name="numerador" id="numerador" required></input></div>                            
+                            <div class="col-md-3"><b><p name="nom" id="nom" >Denominador </p></b><input type="text" class="form-control bfh-number" name="denominador" id="denominador" required="true"></input></div>
+                            <div class="col-md-1"><b><p name="nom" id="nom" >=</p></b></div>
+                            <div class="col-md-3"><b><p name="nom" id="nom" >Resultado X Coeficiente </p></b><input type="text" class="form-control bfh-number" name="resultado" id="resultado" readonly="true"></input></div>
+                        </div>        
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" onclick="guardarRegistroIndicador()" >Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+                <!--   Insertar la tabla donde se van a mostrar los resultados del indicador-->
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--fin modal para crear y editar nuevo indicador-->

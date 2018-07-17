@@ -1,0 +1,192 @@
+<?php
+
+/*
+ * Autor: Jamith Bolaños Vidal
+ * Fecha: 25/05/2016
+ * Controlado para funcionalidad para cargar y descargar resultados de tamizaciones en PDF
+ */
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
+
+class Resultados_pdf extends MX_Controller {
+
+    public function __construct() {
+        parent::__construct();
+        $this->load->model('resultado_pdf_model', 'modelo');
+        $this->load->helper(array('download', 'file', 'url', 'html', 'form'));
+        $this->load->helper('utilidades');
+        $this->folder = 'uploaded_results/';
+    }
+
+    public function index() {
+        $datos['page_title'] = $this->lang->line('lbl_titulo_pagina');
+        $datos['contenido_title'] = "Index";
+        $datos['contenido'] = "resultados_pdf_view";
+        $this->load->view('plantillas/plantilla', $datos);
+    }
+
+    public function cargarResultados() {
+        $archivosAdicionados = array();
+        $srcDestino = "uploaded_results/";
+        $cadenaRegistrosSubidos = "";
+        $cadenaRegistrosNoParametrizados = "";
+        $cadenaRegistrosYaIngresados = "";
+        $numeroCampania = 0;
+        for ($i = 0; $i < count($_FILES["inputData"]["name"]); $i++) {
+            $nameFile = $this->getNameFile($_FILES["inputData"]["name"][$i]);
+            if ($this->modelo->verificarResultado($nameFile)) {
+                $elemento = $this->modelo->getDatosResultado($nameFile);
+                $numeroCampania = $elemento['campania'];
+                if ($elemento != null) {
+                    move_uploaded_file($_FILES["inputData"]["tmp_name"][$i], $srcDestino . $nameFile);
+                    chmod($srcDestino . $nameFile, 0777);
+                    $cadenaRegistrosSubidos = $cadenaRegistrosSubidos . ' ' . $_FILES["inputData"]["name"][$i] . ", ";
+                    $archivosAdicionados[] = $elemento; //Se adicionan los archivos que se van a cargar al sistema para guardad en la BD                        
+                } else {
+                    $cadenaRegistrosNoParametrizados = $cadenaRegistrosNoParametrizados . " " . $_FILES["inputData"]["name"][$i] . ", "; //Archivos cuyo nombre no coinciden con los parametrizados en el sistema, se notifican al usuario, estos archivos no se cargan
+                }
+            } else {
+                $cadenaRegistrosYaIngresados = $cadenaRegistrosYaIngresados . " " . $_FILES["inputData"]["name"][$i] . ", ";
+                //los que ya estan ingresados
+            }
+        }
+        if (count($archivosAdicionados) > 0) {
+            if ($this->modelo->actualizarResultadosCargados($archivosAdicionados)) {
+                $this->notificarCorreo($cadenaRegistrosSubidos, $this->input->post('observacion'), $numeroCampania);
+                $respuesta['cargados'] = TRUE;
+                $respuesta['cargadosMsg'] = "Se almacenaron el (los) siguiente(s) archivo(s): " . $cadenaRegistrosSubidos;
+            }
+        }if ($cadenaRegistrosNoParametrizados != "") {
+            $respuesta['noCargados'] = TRUE;
+            $respuesta['noCargadosMsg'] = "Los siguientes archivos: " . $cadenaRegistrosNoParametrizados . " No se cargaron, debido a que no están parametrizados en el sistema, por favor comuniquese con el administrador del sistema.";
+        }
+        if ($cadenaRegistrosYaIngresados != "") {
+            $respuesta['yaCargados'] = TRUE;
+            $respuesta['yaCargadosMsg'] = "Los siguientes archivos: " . $cadenaRegistrosYaIngresados . " ya se encuentran cargados en el sistema, si desea remplazarlos, por favor comuniquese con el administrador del sistema.";
+        }
+        echo json_encode($respuesta);
+    }
+
+    public function notificarCorreo($cadenaRegistrosSubidos, $observacion, $numeroCampania) {
+        $this->load->library('email');
+        $destinos = $this->modelo->getCorreosNotificacion($numeroCampania);
+        $mails = array();
+        foreach ($destinos as $destino) {
+            $mails[] = $destino['correo'];
+        }
+        $mails[] = "atencion@fundacioninnovagen.org";
+        $mails[] = "lcastano@fundacioninnovagen.org";
+        $mails[] = "coord.ccu@fundacioninnovagen.org";
+        $this->email->from('portal@fundacioninnovagen.org');
+        $this->email->to($mails);
+        $this->email->subject('Nuevo Reporte Configurado');
+        $informacion['codigos_muestras'] = $cadenaRegistrosSubidos;
+        $informacion['obs'] = $observacion;
+        $informacion['numCampania'] = $numeroCampania;
+        $contenido = $this->load->view('notificacionEmailResultados', $informacion, TRUE);
+        $this->email->message($contenido);
+        $resultado = $this->email->send();
+    }
+
+    public function descargarPDF($filename) {
+        $filepath = "uploaded_results/";
+        $fichero = $filepath . $filename . '.pdf'; // aqui para la prueba solo estoy haciendolo con un archivo, luego le pedire parametro para cada archivo
+        $datos = new stdClass();
+        $datos->id_usuario = $this->session->userdata('id_usuario');
+        $datos->fecha_actividad = date("Y-m-d H:i:s");
+        $datos->actividad = 'Descargue resultado';
+        $datos->id_registro = $filename;
+        $this->modelo->insertarBitacora($datos);
+
+        if (file_exists($fichero)) {
+            header('Content-type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $filename . '.pdf"');
+            readfile($fichero);
+            exit;
+        } else {
+            $rows["resultado"] = false;
+            $rows["msg"] = "El archivo no se encuentra cargado en el sistema";
+            echo json_encode($rows);
+        }
+    }
+
+    public function consultarExistenciaPDF() {
+        $criterioBusqueda = $this->input->post('tipoBusqueda');
+        $datos = new stdClass();
+        $datos->filename = $this->input->post('valorBusqueda');
+        $datos->current = $this->input->post('current');
+        $datos->rowCount = $this->input->post('rowCount');
+        $datos->sort = $this->input->post('sort');
+        $datos->searchPhrase = $this->input->post('searchPhrase');
+        if ($criterioBusqueda == 'orden') {
+            $datos->criterio_busqueda = 'cod_mx';
+        } else {
+            if ($criterioBusqueda == 'cedula') {
+                $datos->criterio_busqueda = 'cedula';
+            } else {
+                $datos->criterio_busqueda = 'campania';
+            }
+        }
+        echo $resultados = $this->modelo->getResultados($datos);
+    }
+
+    public function getNameFile($file) {
+        $nameFile = explode('-', $file);
+        if (count($nameFile) == 2) {
+            return $nameFile[0] . '.pdf';
+        }
+        return trim($nameFile[0]);
+    }
+
+    public function getResultadosPDF() {
+        $datos = new stdClass();
+        $datos->current = $this->input->post('current');
+        $datos->rowCount = $this->input->post('rowCount');
+        $datos->sort = $this->input->post('sort');
+        $datos->searchPhrase = $this->input->post('searchPhrase');
+        echo ($this->modelo->getResultadosPDF($datos));
+    }
+
+    public function validarCampania() {
+        $numCampania = $this->input->post('numeroCampania');
+        $arrayCodMxs = $this->modelo->descargar_campania($numCampania);
+        if (count($arrayCodMxs) > 0) {
+            $respuesta['success'] = TRUE;
+        } else {
+            $respuesta['success'] = FALSE;
+            $respuesta['msg'] = "No se han cargado al sistema resultados asociados a la campaña " . $numCampania;
+        }
+        echo json_encode($respuesta);
+    }
+
+    public function descargar_campania($num_campania) {
+        $this->load->library('zip');
+        $srcDestino = "uploaded_results/";
+        $arrayCodMxs = $this->modelo->descargar_campania($num_campania);
+        $zip = new ZipArchive();
+        $filename = $srcDestino . 'test.zip';
+        $file = tempnam("tmp", "zip");
+        $zip = new ZipArchive();
+        if ($zip->open($file, ZIPARCHIVE::OVERWRITE) === true) {
+            foreach ($arrayCodMxs as $codigos) {
+                if (file_exists($srcDestino . $codigos['cod_mx'] . '.pdf') || is_readable($srcDestino . $codigos['cod_mx'] . '.pdf')) {
+                    $zip->addFile($srcDestino . $codigos['cod_mx'] . '.pdf');
+                }
+            }
+        } else {
+            echo 'Error creando ' . $filename;
+        }
+        $zip->close();
+        header("Content-Type: application/zip");
+        header("Content-Length: " . filesize($file));
+        header("Content-Disposition: attachment; filename=\"" . date('d-m-y') . "_campaña_" . $num_campania . ".zip\"");
+        readfile($file);
+        unlink($file);
+    }
+
+    public function getObservacion() {
+        $cod_mx = $this->input->post('cod_mx');
+        echo ($this->modelo->getObservacion($cod_mx));
+    }
+
+}

@@ -1,0 +1,14 @@
+<?php
+
+//if ($this->session->userdata('logged_in')) {
+//$this->load->model('Menu_model', 'modeloU');
+//if($this->modeloU->get_usuario_menu($page_title) || $page_title == '.: Asmet Salud :.') {
+if ($this->session->userdata('logged_in') == TRUE) {
+$this->load->view('plantillas/header');
+$this->load->view('plantillas/west');
+//$this->load->view('plantillas/center_inicio');
+$this->load->view($contenido);
+$this->load->view('plantillas/footer');
+}else{
+    redirect('login');
+}

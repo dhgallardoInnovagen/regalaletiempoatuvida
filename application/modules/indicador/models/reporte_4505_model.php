@@ -1,0 +1,298 @@
+<?php
+
+/*
+ * Autor: Jamith Bolaños Vidal
+ * Fecha: 27/05/2015
+ * Modelo que realiza el acceso a los datos relacionado con el reporte 4505
+ */
+
+class Reporte_4505_model extends CI_Model {
+	function __construct() {
+		parent::__construct();
+	}
+
+	public function getReporte4505($datos) {
+		$inferior = (($datos->current - 1) * $datos->rowCount);
+		$superior = $datos->rowCount;
+		$fechaInicial = $datos->fechaInicial;
+		$fechaFinal = $datos->fechaFinal;
+		$this->db->start_cache();
+		$this->db->select('
+			\'2\' as tipo_registro,
+			row_number() over(order by numero_documento asc) as row,
+			codigo_ips,
+			tipo_id,
+			numero_documento,
+			primer_apellido,
+			CASE segundo_apellido 
+			when \'\' then \'NONE\'
+			else segundo_apellido
+				end as segundo_apellido2,
+			primer_nombre,
+			CASE segundo_nombre 
+			when \'\' then \'NONE\'
+			else segundo_nombre
+				end as segundo_nombre2,
+			fecha_nacimiento,
+			genero,
+			CASE pertenencia_etnica 
+			when \'Indigena\' then \'1\'
+			when \'Afrocolombiano\' THEN \'5\'
+			when \'palenquero\' THEN \'4\'
+			else \'6\'
+				end as pertenencia_etnica1,
+			\'9999\' as ocupacion3,
+			CASE nivel_educativo 
+			when \'Pre escolar\' then \'2\'
+			when \'Básica primaria\' THEN \'3\'
+			when \'Básica segundaria\' THEN \'4\'
+			when \'Media académica o clásica\' THEN \'5\'
+			when \'Media técnica\' THEN \'6\'
+			when \'Normalistas\' THEN \'7\'
+			when \'Técnica profesional\' THEN \'8\'
+			when \'Tecnológia\' THEN \'9\'
+			else \'1\'
+				end as nivel_educativo1,
+			\'21\' as gestacion,
+			\'21\'	as sififlis,
+			\'21\'  as hipertensión,
+			\'21\'  as hipertensión_congénito,
+			\'21\'  as Sintomático,
+			\'21\' as tuberculosis,
+			\'21\' as lepra,
+			\'21\' as obesidad_desnutrición,
+			\'21\' as victima_de_maltrato,
+			\'21\' as victima_de_violencia,
+			\'21\' as infecciones_de_trasmisión_sexual,
+			\'21\' as enfermedad_mental,
+			\'21\' as cancer_de_cervix,
+			\'21\' as cancer_de_seno,
+			\'21\' as fluorosis_dental,
+			CASE when fecha_toma_peso is null
+			then \'1845-01-01\'::text
+			else fecha_toma_peso::text
+				end as fecha_toma_peso1,
+			peso,
+			\'1800-01-01\' as fecha_toma_talla,
+			REPLACE(talla::text, \'.\' , \'\'),
+			\'1845-01-01\' as fecha_probable_parto,
+			\'0\' as edad_gestacional_al_nacer,
+			\'0\' as bcg,
+			\'0\' as hepatitis_b_menores_de_1_año,
+			\'0\' as pentavalente,
+			\'0\' as polio,
+			\'0\' as dpt,
+			\'0\' as rotavirus,
+			\'0\' as neumococo,
+			\'0\' as influenza_niños,
+			\'0\' as fiebre_amarilla_niños_de_1_año,
+			\'22\' as hepatitis_a,
+			\'0\' as triple_viral_niño,
+			\'0\' as vph22,
+			\'0\' as td12345,
+			\'0\' as control_de_placa_bacteriana,
+			\'1845-01-01\' as fecha_atención_parto_o_cesárea,
+			\'1845-01-01\' as fecha_salida_parto_cesárea,
+			\'1845-01-01\' as fecha_consejería_lactancia_materna,
+			\'1845-01-01\' as control_recién_nacido,
+			\'1845-01-01\' as planificación_familiar_primera_vez,
+			\'20\' as suministro_metodo_anticonceptivo,
+			\'1845-01-01\' as fecha_metodo_anticonceptivo,
+			\'1845-01-01\' as control_prenatal_primera_vez,
+			\'0\' as control_prenatal,
+			\'1845-01-01\' as ultimo_control_prenatal,
+			\'0\' as suministro_de_acido_folico,
+			\'0\' as suministro_de_sulfato_ferroso,
+			\'0\' as suministro_de_carbonato,
+			\'1845-01-01\' as valoración_agudeza_visual,
+			\'1845-01-01\' as consulta_por_oftalmología,
+			\'1845-01-01\' as fecha_diagnostico_desnutricion,
+			\'1845-01-01\' as mujer_menor_victima_maltrato,
+			\'1845-01-01\' as victimas_violencia_sexual,
+			\'1845-01-01\' as consulta_nutricion,
+			\'1845-01-01\' as consulta_psicologia,
+			\'1845-01-01\' as crecimiento_desarrollo_primera_vez,
+			\'0\' as suministro_sulfato_ferroso,
+			\'0\' as suministro_vitamina_a_ultima_consulta_menor_10_años,
+			\'1845-01-01\' as consulta_joven_primera_ves,
+			\'1845-01-01\' as consulta_adulto_primera_ves,
+			\'0\' as preservativos_entregados_pacientes,
+			\'1845-01-01\' as bx3,
+			\'1845-01-01\' as asesoría_pos_test_elisa,
+			\'0\' as paciente_diagnostico,
+			\'1845-01-01\' as fecha_antigeno,
+			\'0\' as resultado_antigeno,
+			\'1845-01-01\' as fecha_serologia,
+			\'0\' as resultado_serologia,
+			\'1845-01-01\' as fecha_toma_elisa,
+			\'0\' as resultado_elisa,
+			\'1845-01-01\' as fecha_neonatal ,
+			\'0\' as resultado_neonatal   ,
+			\'1\' as tamizaje_cuello_terino,
+			pin_toma_citologia.fecha_toma,
+			\'\' as resultado_citologia_4505,
+			CASE calidad_muestra 
+			when \'Satisfactoria con endocervicales/zona de transformación\' then \'1\' 
+			else \'1\'
+				end calidad_muestra1,
+			codigo_ips as codigo_ipsr,
+			\'1845-01-01\' as  fecha_colposcopia,
+			\'0\' as codigo_habilitacion,
+			\'1845-01-01\' as fecha_biopsia,
+			\'0\' as  resultado_biopsia,
+			\'0\' as codigo_ips_biopsia,
+			\'1845-01-01\' as  fecha_mamografia,
+			\'0\' as  resultado_mamografia ,
+			\'0\' as  codigo_ips_mamografia,
+			\'1845-01-01\' as  fecha_biopsia_bacaf,
+			\'1845-01-01\' as resultado_biopsia_bacaf,
+			\'0\' as  resultado_biopsia_seno,
+			\'0\' as  codigo_habilitacion_bacaf,
+			\'1845-01-01\' as fecha_hemoglobina_toma,
+			\'0\' as hemoglobina,
+			\'1845-01-01\' as fecha_glicemia_basal,
+			\'1845-01-01\' as fecha_creatinina, 
+			\'0\' as creatinina,
+			\'1845-01-01\' as fecha_hemoglobina,   
+			\'0\' as hemoglobina_glicosilada,
+			\'1845-01-01\' as fecha_microalbuminuria,
+			\'1845-01-01\' as fecha_hdl,
+			\'1845-01-01\' as fecha_baciloscopia, 
+			\'4\' as baciloscopia_diagnostico,  
+			\'0\' as hipotiroidismo_congenito,   
+			\'0\' as sifilis_gestacional,   
+			\'0\' as sifilis_congenita, 
+			\'0\' as tratamiento_lepra,
+			\'1845-01-01\' as tratamiento_leishmaniasis,
+			categorizacion_general,
+			calidad_muestra,
+			anor_cel_escamosas,
+			anor_cel_glandulares'
+			, false);
+$this->db->from('resultado_epidemiologica');
+$this->db->join('pin_resultado_laboratorio', 'pin_resultado_laboratorio.cedula = resultado_epidemiologica.numero_documento');
+$this->db->join('pin_toma_citologia', 'pin_toma_citologia.numero_cedula = resultado_epidemiologica.numero_documento ');
+        //$this->db->where('pin_resultado_laboratorio.categorizacion_general = \'Anormalidades en células epiteliales\' Or pin_resultado_laboratorio.categorizacion_general = \'Negativa para lesión intraepitelial o malignidad\'');
+$this->db->join('par_eps', 'par_eps.id_eps = pin_resultado_laboratorio.eps ::int');
+$this->db->join('par_ips', 'par_ips.id_ips = pin_resultado_laboratorio.ips ::int');
+if ($datos->searchPhrase !== '') {
+	$this->db->or_where("(numero_documento)::text like ('%" . $datos->searchPhrase . "%')");
+	$this->db->or_where("UPPER(nombre_eps) like UPPER('%" . $datos->searchPhrase . "%')");
+	$this->db->or_where("UPPER(nombre_ips) like UPPER('%" . $datos->searchPhrase . "%')");
+        } //$this->db->order_by('id_indicador');
+        if ($this->session->userdata('id_ips') != '') { //si no es administrador
+        	$this->db->where('pin_resultado_laboratorio.ips', $this->session->userdata('id_ips'));
+            if ($this->session->userdata('id_eps') != '') { //si no es administrador
+            	$this->db->where('pin_resultado_laboratorio.eps', $this->session->userdata('id_eps'));
+            }
+        }
+        $this->db->where('pin_toma_citologia.fecha_toma >=', $fechaInicial);
+        $this->db->where('pin_toma_citologia.fecha_toma <=', $fechaFinal);
+
+        $this->db->stop_cache();
+        
+        if (isset($datos->sort) && is_array($datos->sort)) {
+        	$order_by = '';
+        	foreach ($datos->sort as $key => $value)
+        		$order_by = $order_by . $key . ' ' . $value;
+        	$datos->order_by = $order_by;
+        }
+        if (isset($datos->order_by)) {
+        	$this->db->order_by($datos->order_by);
+        }
+        $consulta = $this->db->get();
+        $arrayResultadoInicial = $consulta->result();
+        $indice = $consulta->result();
+        $arraySinRepetidos = array();
+        $arrayResultado = array();
+        $contadorArray = 0;
+        $inferior = 0;
+        $superior = 0;
+               //inicio de consulta$consulta->result();
+        if ($consulta->num_rows > 0) {//inicio IF              	
+            	//Eliminar Datos  Repetidos
+        	$indice = 0;
+        	for ($i=0; $i < count($arrayResultadoInicial)-1; $i++) { 
+        		if ($arrayResultadoInicial[$i]->numero_documento == $arrayResultadoInicial[$i+1]->numero_documento &&  $arrayResultadoInicial[$i]->fecha_toma == $arrayResultadoInicial[$i+1]->fecha_toma) { 
+        		}else{
+        			$arraySinRepetidos[$indice] = $arrayResultadoInicial[$i];
+        			$indice++;
+        		}
+        	}
+        	if ($datos->rowCount == -1 ) {
+        		$superior=$indice;
+        	}else
+        	{
+        		$inferior=($datos->current - 1)*$datos->rowCount;
+        		$superior=(($datos->current-1)*$datos->rowCount) +$datos->rowCount;
+        	}
+        	$indiceArrayResultado = 0;
+        	for ($i= $inferior; $i < $superior; $i++) { 
+        		if ($i<count($arraySinRepetidos)) {
+        			$arrayResultado[$indiceArrayResultado] = $arraySinRepetidos[$i];
+        			$indiceArrayResultado++;
+        		}
+        	}
+        	for ($i=0; $i < count($arrayResultado); $i++) { 
+        		$contadorArray++;
+        		$row = $arrayResultado[$i];
+            	//Fin Eliminar 
+                if ($row->calidad_muestra == 'Satisfactoria con endocervicales/zona de transformación') {//Inicio  if General 
+                    if ($row->categorizacion_general == 'Anormalidades en células epiteliales') {//Inicio if Categorizacion general
+                    	if ($row->anor_cel_escamosas == 'Células escamosas atípicas de significado ind. (ASC-US)') {
+                    		$row->resultado_citologia_4505 = '1';
+                                $row->fecha_colposcopia = '1800-01-01';
+                                $row->fecha_biopsia = '1800-01-01';
+                                $row->codigo_habilitacion = '999';
+                                
+                    	}
+                    	if ($row->anor_cel_escamosas == 'Lesión Escamosa intraepitelial de alto grado (HSIL) - NIC III' ||
+                    		$row->anor_cel_escamosas == 'Lesión Escamosa intraepitelial de alto grado (HSIL) - Ca In Situ' ||
+                    		$row->anor_cel_escamosas == 'Lesión Escamosa intraepitelial de alto grado (HSIL) - NIC II') {
+                    		$row->resultado_citologia_4505 = '4';
+                    }
+
+                    if ($row->anor_cel_escamosas == 'HSIL sospechosa de invasión') {
+                    	$row->resultado_citologia_4505 = '5';
+                    }
+                    if ($row->anor_cel_escamosas == 'Lesión Intraepitelial escamosa de bajo grado (LSIL) - Displasia leve (NICI)' ||
+                    	$row->anor_cel_escamosas == 'Lesión Intraepitelial escamosa de bajo grado (LSIL) - Cambios citopáticos por VPH') {
+                    	$row->resultado_citologia_4505 = '3';
+                }
+                if ($row->anor_cel_escamosas == 'Células escamosas atípicas que no puede excluir HSIL (ASC-H)') {
+                	$row->resultado_citologia_4505 = '2';
+                        } else {// inicio del Else anor_cel_escamosas si esta vacio
+                            if ($row->anor_cel_escamosas === '') {//inicio del if anor_cel-escamosas si esta vacio
+                            	if ($row->anor_cel_glandulares === 'Células endocervicales atípicas (NOS)') {
+                            		$row->resultado_citologia_4505 = '8';
+                            	}
+                            	if ($row->anor_cel_glandulares === 'Células endocervicales atípicas que favorecen neoplasia') {
+                            		$row->resultado_citologia_4505 = '10';
+                                } else {//inicio del else anor_cel_gladulares si esta vacio
+                                }//fin del else anor_cel_gladulares si esta vacio
+                            }//fin del if anor_cel-escamosas si esta vacio
+                        }//Fin else anor_cel_escamosas si esta vacio
+                    }//Fin if categorizacion Genreal
+                    else {
+                        if ($row->categorizacion_general == 'Negativa para lesión intraepitelial o malignidad') {
+                		$row->resultado_citologia_4505 = '17';
+                	}                    	
+                    }
+                }// Fin if General
+                else {                	
+                }
+                unset ($row->categorizacion_general);
+                unset ($row->calidad_muestra);
+                unset ($row->anor_cel_escamosas);
+                unset ($row->anor_cel_glandulares);
+            }//Fin foreach
+        }//inicio IF
+        $rows["total"] = $indice;
+        $rows["current"] = $datos->current;
+        $rows["rowCount"] = $datos->rowCount;
+        $rows["rows"] = $arrayResultado;
+        return json_encode($rows);
+    }
+    //Fin de la cosulta
+    //inicio de exportar
+}

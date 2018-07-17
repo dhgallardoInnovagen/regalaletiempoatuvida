@@ -1,0 +1,143 @@
+/*
+ * Desarrollado por: Jamith Bolaños Vidal
+ * 13 Mayo 2015
+ * funciones en javascript para desarrollar funcionalidades sobre Login
+ */
+
+var url;
+var inconsistencias;
+
+$(document).ready(function () {
+    $("#fmCargarArchivoCedulas").submit(function (e) {
+        e.preventDefault();
+        var fileSelect = document.getElementById('inputCedulas');
+        var files = fileSelect.files;
+        var formData = new FormData();
+        var file = files[0];       
+        formData.append('inputCedulas', file, file.name);
+        $.ajax({
+            url: 'validar_encuesta/getCedulasConArchivo',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                var res = jQuery.parseJSON(response);
+                if (res.success) {
+                     validarErroresEncuestas(res.rows);
+                }
+                else {
+                    $('#operacionFallida').show();
+                    $('#fallo').text(res.msg);
+                }
+            },
+            error: function (e) { // Si no ha podido conectar con el servidor 
+                alert(e.toString());
+
+            }
+        });
+    });
+
+    $("#inputCedulas").fileinput({
+        language: "es",
+        uploadLabel: 'Validar',
+        showCaption: true,
+        showRemove: true,
+        showUpload: true,
+        allowedFileExtensions: ["txt"],
+        maxFileSize: 20000
+    })
+}).end();
+
+function validar(e) {
+    tecla = (document.all) ? e.keyCode : e.which;
+    if (tecla.keyPress == 17 && tecla.keyPress == 86)
+        return true;
+    if (tecla == 8 || tecla == 0)
+        return true;
+    patron = /[0123456789,]/;
+    te = String.fromCharCode(tecla);
+    return patron.test(te);
+}
+
+function validarInconsistencias() {
+    validarErroresEncuestas($('#cedulas').val());
+}
+
+function validarErroresEncuestas(cedulas) {
+    $("#gridValidarEncuestas").bootgrid('destroy');
+    $("#gridValidarEncuestas").bootgrid({
+        /* static POST (be aware of the reserved properties (e.g. sort)) */
+        navigation: 0,
+        post: {
+            cedulas: cedulas
+        }, labels: {
+            infos: ""
+        }, responseHandler: function (rq) {
+            $('#divValidarEncuestas').show();
+            inconsistencias = rq.rows;
+            $('#msgInfo').text(rq.msg);
+            return rq;
+        },
+         formatters: {
+            "formatEpidemiologica": function (column, row)
+            {
+                if (row.encuesta_epidemiologica === 'SI') {
+                    return '<span class="label label-success">SI</span>';
+                } else {
+                    return '<span class="label label-danger">NO</span>';
+                }
+            },
+            "formatEstadoCuello": function (column, row)
+            {
+                if (row.encuesta_estado_cuello === 'SI') {
+                    return '<span class="label label-success">SI</span>';
+                } else {
+                    return '<span class="label label-danger">NO</span>';
+                }
+            },
+            "formatFechaNacimiento": function (column, row)
+            {
+                 if (row.fecha_nacimiento === 'SI') {
+                    return '<span class="label label-success">SI</span>';
+                } else {
+                    return '<span class="label label-danger">NO</span>';
+                }
+            },
+            "formatFechaTomaCitologia": function (column, row)
+            {
+                if (row.fecha_toma_citologia === 'SI') {
+                   return '<span class="label label-success">SI</span>';
+                } else {
+                    return '<span class="label label-danger">NO</span>';
+                }
+            }
+        },
+        url: "validar_encuesta/validarCedulas"
+    });
+}
+
+function reportarInconsistencias() {
+    $.post('validar_encuesta/reportarInconsistencias', {
+        inconsitencias: inconsistencias
+    }, function (result) {
+        if (result.success) {
+            $('#operacionExitosa').show();
+            $('#exito').val(result.msg);
+            setInterval(function () {
+                $('#operacionExitosa').hide()
+            }, 6000);
+        } else {
+            $('#operacionFallida').show();
+            $('#fallo').val(result.msg);
+            setInterval(function () {
+                $('#operacionFallida').hide()
+            }, 6000);
+        }
+        $('#modalNuevaVigencia').modal('hide');
+    }, 'json');
+}
+
+function ocularGridInconsistencias() {
+    $('#divValidarEncuestas').hide();
+}//dps mapa social

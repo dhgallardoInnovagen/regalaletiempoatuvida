@@ -1,0 +1,9 @@
+.overflowP{
+   
+    overflow-x: initial !important;
+}
+
+.bootgrid-header .search, .bootgrid-footer .search {
+  
+    width: 241px;
+}

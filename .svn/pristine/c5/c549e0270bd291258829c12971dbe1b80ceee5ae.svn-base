@@ -1,0 +1,132 @@
+navbar
+/*################
+    Panel Page 
+#################*/
+/* Menu */
+.navbar-default {
+ /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#006973+0,00787f+36,00868b+100 */
+
+}
+
+.navbar-brand {
+  padding: 15px 19px;
+}
+
+.navbar {
+  border-radius: 0px;
+}
+
+.navbar-default .navbar-nav>li>a {
+  transition: all 0.5s ease;
+  text-align: center;
+  color: #FFF;
+}
+
+.navbar-default .navbar-nav>li>a>span.bubble {
+  background: #00BFF7;
+  width: 25px;
+  height: auto;
+  display: inline-block;
+  text-align: center;
+  border-radius: 3px;
+}
+
+.navbar-default .navbar-nav>li>a>i {
+font-size: 16px;
+}
+
+.navbar-default .navbar-collapse, .navbar-default .navbar-form {
+  border-color: #004F6C;
+}
+
+.navbar-default .navbar-toggle {
+  border-color: #008EC2;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+  background-color: #FFF;
+}
+
+.navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover {
+  background-color: #00BFF7;
+}
+
+.navbar-default .navbar-nav>li>a:focus, .navbar-default .navbar-nav>li>a:hover {
+  color:#FFF;
+  background-color:#006973;
+}
+
+.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:focus, .navbar-default .navbar-nav>.open>a:hover {
+  color: #FFF;
+  background-color:#00868b;
+}
+
+.navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:focus, .navbar-default .navbar-nav>.active>a:hover {
+  color: #FFF;
+  background-color: #004F6C;
+}
+
+.navbar-default .navbar-brand {
+  color: #FFF;
+  background: #004F6C;
+}
+
+.navbar-default .navbar-brand:focus, .navbar-default .navbar-brand:hover {
+  color: #FFF;
+  background-color: rgb(0, 112, 153);
+}
+
+.nav>li>a>img {
+  max-width: 32px;
+  border-radius: 50%;
+  
+}
+
+/* User Settings */
+
+#user-setting a{
+   padding:3 15px 15px;
+}
+#user-setting2 a{
+   padding:10px 25px 10px 25px;
+
+
+}
+
+/* Panel Default Change Style */
+
+
+.row-fluid > * {
+    height: 200px;
+}
+
+/* Sider Menu */
+#top-menu .dropdown-menu>li>a:focus, .dropdown-menu>li>a:hover {
+  transition: all 0.3s ease;
+  color: #FFFFFF;
+  text-decoration: none;
+  background-color: #006973;
+}
+.navbar{
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#006973+0,00787f+36,00868b+100 */
+background: #006973; /* Old browsers */
+background: -moz-linear-gradient(top,  #006973 0%, #00787f 36%, #00868b 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top,  #006973 0%,#00787f 36%,#00868b 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom,  #006973 0%,#00787f 36%,#00868b 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#006973', endColorstr='#00868b',GradientType=0 ); /* IE6-9 */
+
+}
+.hidden-xs{
+color: #FFFFFF;
+font-size: 13px;
+font-family: "Arial";
+font-weight: 700;
+}
+#imagen2{
+  height: 250px;
+  width: 250px;
+  
+}
+#imagen2: hover{
+  border-radius: none;
+}

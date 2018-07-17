@@ -1,0 +1,124 @@
+<!--<script type="text/javascript" src="<?php echo base_url() ?>public/js/funcionesWest.js"></script>-->
+<!--<link rel="stylesheet" href="<?php echo base_url() ?>public/css/menucss.css" type="text/css"/>-->
+<div class="col-sm-1" style="padding-left: -15px;">
+    <nav class="main-menu">
+        <div class="contenedor1">
+            <div class="contenedor2">
+                <ul>
+                    <li>
+                        <a href="<?php echo base_url(); ?>indicador/reporte_tamizacion">
+                            <img id="icnTamizacion" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_Tamizacion.png">
+                            <span class="nav-text">                      
+                                Reporte tamización
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo base_url(); ?>indicador/gestion_positivas">
+                            <img id="icnPositivas" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_Positivas.png">                    
+                            <span class="nav-text">
+                                Gestion Positivas
+                            </span>                    
+                        </a>
+                    </li>
+                    <?php if ($this->session->userdata('rol') == 1) { ?> 
+                        <li class="has-subnav">
+                            <a href="<?php echo base_url(); ?>indicador/gestionarIndicador">
+                                <img id="icnGIndicador" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_GIndicador.png">                         
+                                <span class="nav-text">
+                                    Gestionar indicador
+                                </span>                         
+                            </a>
+                        </li>
+                    <?php } ?>
+                    <?php if ($this->session->userdata('rol') == 1 || $this->session->userdata('rol') == 2) { ?>  
+                        <!--                rol administrado y tecnico-->
+                        <li class="has-subnav">
+                            <a href="<?php echo base_url(); ?>indicador/ingresar_indicador">
+                                <img id="icnIngIndicador" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_Indicador.png">                          
+                                <span class="nav-text">
+                                    Ingresar Indicador
+                                </span>                         
+                            </a>
+                        </li>
+                        <li class="has-subnav">
+                            <a href="<?php echo base_url(); ?>indicador/importarDatosView"">
+                                <img id="icnImportar" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_Importar.png">                       
+                                <span class="nav-text">Importar Datos</span>                       
+                            </a>
+
+                        </li>
+                        <li>
+                            <a href="<?php echo base_url(); ?>indicador/exportar_encuesta">
+                                <img id="icnExportar" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_Exportar.png">                         
+                                <span class="nav-text">
+                                    Exportar Encuesta
+                                </span>                       
+                            </a>
+                        </li>   
+                        <li>
+                            <a href="<?php echo base_url(); ?>indicador/validar_encuesta">
+                                <img id="icnValidar" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_Validar.png">                          
+                                <span class="nav-text">
+                                    Validador Encuestas
+                                </span>                         
+                            </a>
+                        </li>    
+                        <li>
+                            <a href="<?php echo base_url(); ?>indicador/inconsistencia">
+                                <img id="icnInconsistencias" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_Inconsistencias.png">                          
+                                <span class="nav-text">
+                                    Gestionar Inconsistencia
+                                </span>                      
+                            </a>
+                        </li>   
+                    <?php } ?>
+                    <?php if ($this->session->userdata('rol') == 1 || $this->session->userdata('rol') == 2 || $this->session->userdata('rol') == 3) { ?>
+                        <!--                rol administrado y tecnico-->
+                        <li>
+                            <a href="<?php echo base_url(); ?>indicador/resultados_pdf">
+                                <img id="icnPdf" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_pdf.png">                          
+                                <span class="nav-text">
+                                    Resultados PDF
+                                </span>                         
+                            </a>
+                        </li>   
+                        <li>
+                            <a href="<?php echo base_url(); ?>indicador/validar_survey">
+                                <img id="icnSurvey" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_SurveyGizmo.png">                          
+                                <span class="nav-text">
+                                    Validar SurveyGizmo
+                                </span>                          
+                            </a>
+                        </li>
+                    <?php } ?>
+
+                    <li>
+                        <a href="<?php echo base_url(); ?>indicador/reporte_resultado">
+                            <img id="icnMedicion" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_Medicion.png">
+                            <span class="nav-text">
+                                Reporte Medición
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo base_url(); ?>indicador/reporte_trazabilidad">
+                            <img id="icnTrazabilidad" class="icon-menu" src="<?php echo base_url(); ?>public/images/iconos/Icon_Trazabilidad.png">
+                            <span class="nav-text">
+                                Reporte Trazabilidad
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo base_url(); ?>indicador/reporte_4505">
+                            <img id="icn4505" class="icon-menu"  src="<?php echo base_url(); ?>public/images/iconos/Icon_4505.png">
+                            <span class="nav-text">
+                                Reporte 4505
+                            </span>
+                        </a>
+                    </li>                    
+                </ul>  
+            </div>
+        </div>
+    </nav>
+</div>

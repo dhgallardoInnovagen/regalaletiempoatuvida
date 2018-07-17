@@ -1,0 +1,281 @@
+
+
+<script type="text/javascript" src="<?php echo base_url() ?>public/js/funcionesIndicador.js"></script>
+<div class="form-group" align="center">
+    <div class="col-md-8" align="center">
+        <div class="alert alert-danger" id="errorIndicador" hidden="true">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <output id="msgErrorIndicador"></output>             
+        </div>  
+
+        <div class="alert alert-success" id="successIndicador" hidden="true">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <output id="msgOkIndicador"></output>
+        </div>                
+        <table id="grid-data" class="table table-condensed table-hover table-striped" data-toggle="bootgrid" data-ajax="true" cellspacing="0" width="100%" data-url="indicador/getIndicadores">
+            <thead>
+                <tr>
+        <!--            <th data-column-id="id" data-type="numeric" data-identifier="true">ID</th>-->
+                    <th data-column-id="id_indicador"  >Id</th>
+                    <th data-column-id="nombre_indicador" data-width="80%" >Indicador</th>                    
+                    <th data-column-id="commands" data-formatter="commands" data-sortable="false" data-width="10%">Acción</th>
+                </tr>
+            </thead>	
+        </table>                       
+    </div>    
+</div>
+
+<!-- Modal para eliminar indicadores -->
+<div id="modalEliminarIndicador" hidden="true" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-md">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Eliminar Indicador</h4>
+            </div>
+            <div class="modal-body">
+                <output id="msgEliminarIndicador"></output>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="eliminarIndicador()" >Eliminar</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--fin modal para eliminar indicadores-->
+
+<!--Modal para elegir indicadores de una nueva vigencia-->
+<div id="modalNuevaVigencia" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Creación de nuevo periodo de medición</h4>
+            </div>
+            <div class="modal-body" align="left">
+
+                <form id="formNuevaVigencia">   
+                    <div class="row">
+                        <div class='col-sm-4'>
+                            <div class="form-group">
+                                <div><b><p name="nom" id="nom" >Fecha inicial </p></b> </div>
+                                <div class='input-group date' id='fechaInicial'>
+                                    <input type='text' class="form-control" id="fechaInicialInput" required/>
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class='col-sm-4'>
+                            <div class="form-group">
+                                <div><b><p name="nom" id="nom" >Fecha final </p></b> </div>
+                                <div class='input-group date' id='fechaFinal'>
+                                    <input type='text' class="form-control" id="fechaFinalInput" required/>
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">            
+                        <table id="tblIndicadoresNuevaVigencia"  class="table table-condensed table-hover table-striped">
+                            <thead>
+                                <tr> 
+                                    <th data-column-id="id_indicador"  data-identifier="true">Id</th>
+                                    <th data-column-id="nombre_indicador">Indicador</th>
+                                    <th data-column-id="clasificacion">Clasificación</th>
+                                </tr>
+                            </thead>	
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>                    
+                    </div>
+                </form>
+            </div>            
+        </div>
+    </div>
+</div>
+<!--fin modal para crear nueva vigencia-->
+
+<!--modal para crear y editar un nuevo indicador-->
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Información sobre el indicador</h4>
+            </div>
+            <div class="modal-body">
+                <form id ="datosIndicador" data-toggle="validator"  role="form">
+                    <div class="form-group">
+                        <div class="row" hidden="true">
+                            <br/>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Id indicador </p></b> </div>
+                            <div class="col-md-10"><input  type="text" class="form-control" name="idIndicador" id="idIndicador" readonly="true"></input></div>
+                        </div>
+                        <div class="row">
+                            <br/>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Indicador </p></b> </div>
+                            <div class="col-md-10"><input  type="text" class="form-control" name="nombreIndicador" id="nombreIndicador" required></input></div>
+                        </div>                        
+                        <div class="row">
+                            <br>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Forma Cálculo </p></b> </div>
+                            <div class="col-md-10"><textarea rows="1" type="text" class="form-control" name="formaCalculo" id="formaCalculo" required></textarea></div>
+                        </div>
+                        <div class="row">
+                            <br/>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Definición operacional </p></b> </div>
+                            <div class="col-md-10"><textarea rows="3" type="text" class="form-control"  name="definicionOperacional" id="definicionOperacional" required></textarea></div>
+                        </div>                        
+                        <div class="row">
+                            <br/>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Aplicación </p></b> </div>
+                            <div class="col-md-5">
+                                <select class="form-control" placeholder=".input-lg" id="aplicacion" required>
+                                    <option value="Municipal">Municipal</option>
+                                    <option value="Departamental">Departamental</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Clasificación </p></b> </div>
+                            <div class="col-md-3">
+                                <select class="form-control" placeholder=".input-lg" id="clasificacionIndicador" required>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <br/>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Responsable </p></b>                           
+                            </div>                            
+                            <div class="col-md-5">
+                                <select class="form-control" placeholder=".input-lg" id="responsable" required>
+                                </select>                               
+                            </div>
+
+<!--                            <div class="col-md-2"><b><p name="nom" id="nom" >Meta </p></b> </div>
+<div class="col-md-5"><input type="text" class="form-control bfh-number" name="metaIndicador" id="metaIndicador" required></input></div>-->
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Constante </p></b> </div>
+                            <div class="col-md-3"><input  type="text" required="true" class="form-control" onkeypress="return validar(event)" name="coeficienteIndicador" id="coeficienteIndicador" required></input></div>
+                        </div>
+                        <div class="row">
+                            <br/>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Meta Óptima</p></b> </div>
+                            <div class="col-md-2">
+                                <select class="form-control" id="metaOptima" required>
+                                    <option value="mayor">Mayor</option>
+                                    <option value="menor">Menor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" name="metaIndicadorOptima" placeholder="Valor Óptimo" id="metaIndicadorOptima" onkeypress="return validar(event)"  required></input>
+                            </div>
+                            <div class="col-md-2"><b><p name="nom" id="nom" >Fuente</p></b> </div>
+                            <div class="col-md-3"><input  type="text"  class="form-control" name="fuenteIndicador" id="fuenteIndicador" required></input></div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-md-16">
+                                <div class="col-md-2"><b><p name="nom" id="nom" >Meta Deficiente</p></b> </div>
+                                <div class="col-md-2">
+                                    <select class="form-control" id="metaDeficiente">
+                                        <option  value="mayor">Mayor</option>
+                                        <option  value="menor">Menor</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3"> 
+                                    <input type="text" class="form-control" name="metaIndicadorDeficiente" placeholder="Valor Deficiente" onkeypress="return validar(event)"  id="metaIndicadorDeficiente" required></input>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-default" onclick="abrirDialogoCondicion()">Enlazar datos</button>
+                                </div>
+                            </div>
+                            <br/>
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+                <!--   Insertar la tabla donde se van a mostrar los resultados del indicador-->
+            </div>
+        </div>
+    </div>
+</div>
+<!--fin modal para crear y editar nuevo indicador-->
+
+<!-- Modal para asignar condiciones a numeradores denominadores -->
+<div id="modalCondicion" hidden="true" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-md">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Enlazar datos a numerador, denominador</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="formCondicion">
+                        <div class="col-md-12">
+                            <b><p name="nom" id="nom" >Numerador</p></b>
+                            <select class="form-control"  id="cmbNumerador" required>
+                                <option value="vacio">No aplica</option>
+                                <option value="NumeroTamizaciones">Número tamizaciones</option>
+                                <option value="insatisfactorias">Número insatisfactorias</option>
+                                <option value="oportunidadRecepcion">Sumatoria días para que las muestras ingresen al laboratorio</option>
+                                <option value="oportunidadLaboratorio">Sumatoria de días para el procesamiento de las muestras</option>
+                                <option value="oportunidadEnvio">Sumatoria de días para la entrega del resultado</option>
+                                <option value="TamizacionesAcumuladasFase3">Tamizaciones Fase 3</option>
+                                <option value="NumeroResultadosProcesados">Resultados procesados</option>
+                                <option value="NumeroDemandasInducidas">Encuestas por demanda inducida</option>
+                                <option value="NumeroCitologiasDemandasInducidas">Citologías por demanda inducida</option>
+                                <option value="NumeroCitologiasLesionesBajoGrado">Citologías con lesiones de bajo grado</option>
+                                <option value="NumeroCitologiasLesionesAltoGrado">Citologías con lesiones de alto grado</option>
+                                <option value="NumeroCitologiasAnormalidadesGlandulares">Citologías con anormalidades en celulas glandulares</option>
+                                <option value="NumeroCitologiasAlteradas">Citologías alteradas</option>
+                                <option value="NumeroCitologiasNegativas">Citologías negativas</option>
+                                <option value="NumeroCitologiasInsatisfactorias">Citologías insatisfactorias</option>
+                                <option value="NumeroCitologiaNegativaVPHPositivas">Citologías negativas y VPH positivos para 16, 18 y otros</option>
+                                <option value="NumeroVPHPositivas16">VPH positivas para 16</option>
+                                <option value="NumeroVPHPositivas18">VPH positivas para 18</option>
+                                <option value="NumeroVPHPositivas16y18">VPH positivas para 16 y 18</option>
+                                <option value="NumeroVPHPositivasOtros">VPH positivas para otros</option>
+                                
+                            </select>
+                        </div>
+                </div><br/>
+                <div class="row">
+                    <div class="col-md-12">
+                        <b><p name="nom" id="nom" >Denominador</p></b>
+                        <select class="form-control"  id="cmbDenominador" required>
+                            <option value="vacio">No aplica</option>
+                            <option value="NumeroTamizaciones">Número tamizaciones</option>
+                            <option value="muestrasProcesadas">Número muestras procesadas (Oportunidades)</option>
+                            <option value="NumeroDemandasInducidas">Encuestas por demanda inducida</option>
+                            <option value="NumeroCitologiasDemandasInducidas">Citologías por demanda inducida</option>
+                            <option value="NumeroResultadosProcesados">Resultados procesados</option>
+                        </select>
+                    </div>
+                    </form>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="asignarCondicion()" >Aceptar</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--fin modal para asignar condiciones a numerador denominador-->
